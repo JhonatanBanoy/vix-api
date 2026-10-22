@@ -68,17 +68,58 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { name, email, password, profileImage } = req.body;
-    const updateData = { name, email };
+
+    if (!name || !email) {
+      return res.status(400).json({ message: "Nombre y correo son obligatorios" });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    // ¿Otro usuario ya usa ese correo?
+    const existing = await User.findOne({
+      email: normalizedEmail,
+      _id: { $ne: req.user.id },
+    });
+    if (existing) {
+      return res.status(400).json({ message: "Ese correo ya está registrado" });
+    }
+
+    const updateData = {
+      name: String(name).trim(),
+      email: normalizedEmail,
+    };
+
     if (profileImage) {
       updateData.profileImage = profileImage;
     }
+
     if (password) {
+      if (String(password).length < 6) {
+        return res.status(400).json({
+          message: "La contraseña debe tener al menos 6 caracteres",
+        });
+      }
       updateData.password = await bcrypt.hash(password, 10);
     }
-    const user = await User.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('-password');
+
+    const user = await User.findByIdAndUpdate(req.user.id, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
     res.json(user);
   } catch (err) {
-    res.status(500).json({ message: 'Error en el servidor' });
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Ese correo ya está registrado" });
+    }
+    if (err.name === "CastError") {
+      return res.status(400).json({ message: "Usuario inválido" });
+    }
+    res.status(500).json({ message: "Error en el servidor" });
   }
 };
 
