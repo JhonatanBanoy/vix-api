@@ -7,8 +7,8 @@ WORKDIR /app
 # Copiar dependencias
 COPY package.json package-lock.json ./
 
-# Instalar solo dependencias de producción
-RUN npm install --omit=dev
+# Instalar dependencias (incluye nodemon, necesario para el modo dev)
+RUN npm install
 
 # Copiar el código fuente
 COPY . .

@@ -67,8 +67,11 @@ const getProfile = async (req, res) => {
 // Actualizar perfil del usuario autenticado
 const updateProfile = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, profileImage } = req.body;
     const updateData = { name, email };
+    if (profileImage) {
+      updateData.profileImage = profileImage;
+    }
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
     }

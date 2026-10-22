@@ -8,19 +8,21 @@ services:
       - /app/node_modules  # Evita sobreescribir node_modules
     environment:
       - NODE_ENV=development
+      # Dentro de Docker, MongoDB se llama "mongo" (no localhost)
+      - MONGO_URI=mongodb://mongo:27017/ecommerce
     restart: unless-stopped  # Reinicia automáticamente si falla
     command: npm run dev     # Sobreescribe el comando por defecto
     depends_on:
       - mongo  # Espera a que MongoDB esté listo antes de iniciar la API
 
   mongo:
-    image: mongo  # Imagen oficial de MongoDB
+    image: mongo:6.0  # Imagen oficial de MongoDB (6.0: tus datos fueron creados con esta versión)
     container_name: mongo  # Nombre del contenedor
     restart: always  # Reinicia siempre el contenedor
     ports:
       - "27017:27017"  # Puerto de MongoDB
     volumes:
-      - mongo-data:/data/db  # Persistencia de datos de MongoDB
+      - mongo_data:/data/db  # Persistencia de datos de MongoDB
 
 volumes:
-  mongo-data:  # Volumen para persistencia de datos de MongoDB
+  mongo_data:  # Volumen para persistencia de datos de MongoDB

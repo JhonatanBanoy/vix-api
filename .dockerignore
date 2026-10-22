@@ -1,0 +1,15 @@
+# Evita copiar dependencias locales (se instalan dentro del contenedor)
+node_modules
+
+# Variables de entorno (en Docker se pasan por docker-compose)
+.env
+
+# Logs
+*.log
+
+# Sistema / Git
+.DS_Store
+Thumbs.db
+.git
+.gitignore
+.dockerignore
