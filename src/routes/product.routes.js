@@ -21,7 +21,7 @@ router.get("/", getProducts);
 router.get(
   "/:id",
   [
-    check("id", "El ID debe ser un número válido").isNumeric(),
+    check("id", "El ID debe ser un ObjectId válido").isMongoId(),
     validateFields,
   ],
   getProductById

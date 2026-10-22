@@ -66,6 +66,10 @@ const getProductById = async (req, res) => {
     }
     res.json(product);
   } catch (error) {
+    // Un ID con formato inválido no debe romper el servidor
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "ID de producto inválido" });
+    }
     res.status(500).json({ message: "Error al buscar producto", error });
   }
 };
@@ -75,7 +79,7 @@ const getProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   const { name, price, description, image, stock } = req.body;
 
-if (!name || !price || !description || !image || !stock) {
+if (!name || price === undefined || !description || !image || stock === undefined) {
   return res.status(400).json({ message: "Todos los campos son obligatorios" });
 }
 
