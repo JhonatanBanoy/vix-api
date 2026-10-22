@@ -77,7 +77,7 @@ const getProductById = async (req, res) => {
 
 // Crear producto
 const createProduct = async (req, res) => {
-  const { name, price, description, image, stock } = req.body;
+  const { name, price, description, image, stock, isActive } = req.body;
 
 if (!name || price === undefined || !description || !image || stock === undefined) {
   return res.status(400).json({ message: "Todos los campos son obligatorios" });
@@ -91,7 +91,8 @@ if (!name || price === undefined || !description || !image || stock === undefine
         price,
         description,
         image,
-        stock
+        stock,
+        isActive: isActive !== false
       }
     );
     await newProduct.save();
@@ -101,21 +102,34 @@ if (!name || price === undefined || !description || !image || stock === undefine
   }
 };
 
-// Actualizar producto
+// Actualizar producto (acepta actualizaciones parciales)
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, price, description, image, stock } = req.body;
+
+  const allowed = ["name", "price", "description", "image", "stock", "isActive"];
+  const update = {};
+
+  for (const field of allowed) {
+    if (req.body[field] !== undefined) update[field] = req.body[field];
+  }
+
+  if (!Object.keys(update).length) {
+    return res.status(400).json({ message: "No hay campos para actualizar" });
+  }
+
   try {
-    const updated = await Product.findByIdAndUpdate(
-      id,
-      { name, price, description, image, stock },
-      { new: true }
-    );
+    const updated = await Product.findByIdAndUpdate(id, update, {
+      new: true,
+      runValidators: true,
+    });
     if (!updated) {
       return res.status(404).json({ message: "Producto no encontrado" });
     }
     res.json(updated);
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "ID de producto inválido" });
+    }
     res.status(500).json({ message: "Error al actualizar producto", error });
   }
 };
@@ -130,6 +144,9 @@ const deleteProduct = async (req, res) => {
     }
     res.json({ message: "Producto eliminado" });
   } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: "ID de producto inválido" });
+    }
     res.status(500).json({ message: "Error al eliminar producto", error });
   }
 };

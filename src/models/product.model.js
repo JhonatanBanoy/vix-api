@@ -21,6 +21,11 @@ const productSchema = new Schema({
     type: Number,
     default: 0,
   },
+  // Disponible en la tienda (false = oculto para los clientes)
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
