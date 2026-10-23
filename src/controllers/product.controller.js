@@ -77,11 +77,25 @@ const getProductById = async (req, res) => {
 
 // Crear producto
 const createProduct = async (req, res) => {
-  const { name, price, description, image, stock, isActive } = req.body;
+  const {
+    name,
+    price,
+    description,
+    image,
+    stock,
+    isActive,
+    category,
+    compareAtPrice,
+  } = req.body;
 
 if (!name || price === undefined || !description || !image || stock === undefined) {
   return res.status(400).json({ message: "Todos los campos son obligatorios" });
 }
+
+  const previousPrice =
+    compareAtPrice === "" || compareAtPrice === null || compareAtPrice === undefined
+      ? null
+      : Number(compareAtPrice);
 
   // try
   try {
@@ -92,6 +106,8 @@ if (!name || price === undefined || !description || !image || stock === undefine
         description,
         image,
         stock,
+        category: typeof category === "string" ? category.trim() : "",
+        compareAtPrice: previousPrice,
         isActive: isActive !== false
       }
     );
@@ -106,11 +122,28 @@ if (!name || price === undefined || !description || !image || stock === undefine
 const updateProduct = async (req, res) => {
   const { id } = req.params;
 
-  const allowed = ["name", "price", "description", "image", "stock", "isActive"];
+  const allowed = [
+    "name",
+    "price",
+    "description",
+    "image",
+    "stock",
+    "isActive",
+    "category",
+    "compareAtPrice",
+  ];
   const update = {};
 
   for (const field of allowed) {
     if (req.body[field] !== undefined) update[field] = req.body[field];
+  }
+
+  // Normaliza campos opcionales
+  if (update.compareAtPrice === "" || update.compareAtPrice === null) {
+    update.compareAtPrice = null;
+  }
+  if (typeof update.category === "string") {
+    update.category = update.category.trim();
   }
 
   if (!Object.keys(update).length) {

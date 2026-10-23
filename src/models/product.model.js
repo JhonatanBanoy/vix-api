@@ -21,6 +21,18 @@ const productSchema = new Schema({
     type: Number,
     default: 0,
   },
+  // Categoría del catálogo (slug: audifonos, tecnologia, moda-hombre, ...)
+  category: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  // Precio anterior para mostrar descuentos. null = sin oferta.
+  compareAtPrice: {
+    type: Number,
+    default: null,
+    min: 0,
+  },
   // Disponible en la tienda (false = oculto para los clientes)
   isActive: {
     type: Boolean,

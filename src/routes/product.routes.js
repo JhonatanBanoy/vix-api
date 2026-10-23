@@ -35,6 +35,10 @@ router.post(
     checkRole(["admin"]),
     check("name", "El nombre es obligatorio").not().isEmpty(),
     check("price", "El precio debe ser un número válido").isFloat({ gt: 0 }),
+    check("category").optional().isString(),
+    check("compareAtPrice")
+      .optional({ nullable: true })
+      .isFloat({ min: 0 }),
     validateFields,
   ],
   createProduct
@@ -49,6 +53,10 @@ router.put(
     authenticateToken,
     checkRole(["admin"]),
     check("id", "El ID debe ser válido").isMongoId(),
+    check("category").optional().isString(),
+    check("compareAtPrice")
+      .optional({ nullable: true })
+      .isFloat({ min: 0 }),
     validateFields,
   ],
   updateProduct
