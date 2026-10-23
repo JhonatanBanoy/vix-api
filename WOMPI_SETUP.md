@@ -5,18 +5,36 @@ la tienda muestra **pago contra entrega** y el pago en línea queda oculto.
 
 ## 1. Abrir la cuenta de comercio
 
-Wompi es de Bancolombia. Para recibir desembolsos necesitas:
+**Crear la cuenta no tiene costo de vinculación ni mensualidad.** Wompi cobra
+una comisión solo cuando una venta se completa. La tarifa publicada del Plan
+Avanzado es:
 
-- RUT actualizado (persona natural o jurídica).
+- **2,65% + $700 + IVA por transacción exitosa** (tarjetas, PSE, Nequi, etc.).
+- El Código QR tiene una tarifa especial del 1%, pero no aplica al checkout web.
+
+Confirma la tarifa vigente en <https://wompi.com/es/co/planes-tarifas/> antes de
+publicar precios.
+
+Wompi es de Bancolombia. Para una cuenta de **persona natural** necesitas:
+
 - Cédula del titular.
-- Cuenta Bancolombia de ahorros o corriente a nombre del titular.
-  También puedes usar Nequi si eres persona natural y la cuenta tiene más de
-  30 días.
-- Correo de contacto real.
+- RUT actualizado (sin contraseña).
+- Cuenta Bancolombia de ahorros o corriente a nombre del titular, con más de
+  30 días de antigüedad. Nequi puede servir para persona natural, pero confirma
+  con Wompi antes de iniciar el trámite.
+- Correo y teléfono reales.
+- Una URL pública de la tienda. `localhost` no sirve para producción: primero
+  hay que desplegar el frontend y el backend con HTTPS.
 
-Regístrate en <https://comercios.wompi.co/> y completa la vinculación. Wompi
-te entrega cuatro credenciales desde **Desarrolladores > Secretos para
-integración técnica**:
+El primer desembolso para persona natural se hace **30 días después de la
+primera venta**. Los siguientes desembolsos son al siguiente día hábil.
+
+Regístrate en <https://registro.wompi.co/es/onboarding/aggregator>, elige
+**Persona Natural**, crea tu usuario y tu comercio, y carga los documentos.
+Wompi revisa la solicitud; no es instantáneo.
+
+Cuando te aprueben, entra a **Desarrolladores > Secretos para integración
+técnica**. Allí están las cuatro credenciales:
 
 - Llave pública (`pub_test_...` o `pub_prod_...`).
 - Llave privada (`prv_test_...` o `prv_prod_...`).
@@ -51,7 +69,8 @@ docker compose restart api
 
 ## 3. Configurar el webhook
 
-En el dashboard de Wompi, configura la URL de eventos:
+En el dashboard de Wompi entra a **Desarrollo > Eventos**, agrega una URL y
+selecciona el evento `transaction.updated`. La URL debe ser pública y HTTPS:
 
 ```text
 https://api.tudominio.com/api/orders/wompi/webhook
@@ -62,8 +81,11 @@ Wompi enviará el evento `transaction.updated`. El backend valida la firma con
 pago como aprobado: solo el webhook (o la consulta autenticada a Wompi) puede
 hacerlo.
 
-Para probar en local necesitas una URL pública con HTTPS (por ejemplo,
-ngrok) y configurarla tanto en `FRONTEND_URL` como en el dashboard de Wompi.
+La URL de eventos debe ser del mismo ambiente que las llaves: si usas llaves
+`test`, configura la URL de pruebas; si usas llaves `prod`, configura la de
+producción. Para probar en local necesitas una URL pública con HTTPS (por
+ejemplo, ngrok) y configurarla tanto en `FRONTEND_URL` como en el dashboard de
+Wompi.
 
 ## 4. Cómo comprobar que quedó activo
 
