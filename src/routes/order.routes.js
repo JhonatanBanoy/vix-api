@@ -1,10 +1,36 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { createOrder, getUserOrders } = require('../controllers/order.controller');
-const validateJWT = require('../middlewares/validateJWT'); // Middleware para validar el token JWT
 
-// Creamos las rutas para las ordenes
-router.post("/", validateJWT, createOrder); // Crear una nueva orden
-router.get("/", validateJWT, getUserOrders); // Obtener las ordenes del usuario autenticado
+const {
+  createGuestOrder,
+  getAdminOrders,
+  getGuestOrderByToken,
+  getUserOrders,
+  syncWompiOrder,
+  updateOrderStatus,
+  wompiWebhook,
+} = require("../controllers/order.controller");
+const authenticateToken = require("../middlewares/authMiddleware");
+const checkRole = require("../middlewares/roleMiddleware");
 
-module.exports = router; // Exportar el router para usarlo en otros archivos
+// Checkout público: no requiere iniciar sesión.
+router.post("/guest", createGuestOrder);
+router.get("/guest/token/:token", getGuestOrderByToken);
+
+// Wompi: webhook firmado y sincronización al volver del checkout.
+router.post("/wompi/webhook", wompiWebhook);
+router.post("/wompi/sync", syncWompiOrder);
+
+// Historial del usuario autenticado.
+router.get("/", authenticateToken, getUserOrders);
+
+// Administración de pedidos.
+router.get("/admin", authenticateToken, checkRole(["admin"]), getAdminOrders);
+router.patch(
+  "/:id/status",
+  authenticateToken,
+  checkRole(["admin"]),
+  updateOrderStatus
+);
+
+module.exports = router;
